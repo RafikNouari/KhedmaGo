@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hedmaGo | اكتشف الخدمات القريبة منك</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="hedmaGo - الرئيسية">
+      <img class="brand-logo" src="khedma-go-logo.png" alt="شعار K - hedmaGo"><span class="brand-name">hedmaGo</span>
+    </a>
+    <nav class="category-nav" id="categoryNav" aria-label="فئات الخدمات"></nav>
+    <div class="top-actions">
+      <button class="btn btn-ghost add-listing-icon" id="addListingBtn" aria-label="إضافة خدمة" title="إضافة خدمة">＋</button>
+      <button class="menu-trigger" id="menuTrigger" aria-label="فتح القائمة الجانبية" aria-controls="sideDrawer" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> خدمات منطقتك في مكان واحد</div>
+        <h1>تحتاج خدمة؟<br><span>ابدأ من هنا.</span></h1>
+        <p>اعثر على مقدم الخدمة المناسب بالقرب منك، اكتشف الخيارات، وقارن التقييمات قبل أن تتواصل بثقة.</p>
+        <div class="hero-stats">
+          <div><strong id="providerCount">120+</strong><span>مقدم خدمة تجريبي</span></div>
+          <div><strong>9</strong><span>فئات متنوعة</span></div>
+          <div><strong>4.8/5</strong><span>متوسط التقييم</span></div>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+        <div class="art-card art-card-main"><span class="art-icon">✦</span><div><b>خدمات موثوقة</b><small>كل ما تحتاجه في مكان واحد</small></div><span class="art-check">✓</span></div>
+        <div class="art-card art-card-float"><span class="mini-pin">⌖</span><div><b>قريب منك</b><small>اكتشف الخيارات حولك</small></div></div>
+        <div class="art-spark spark-a">✳</div><div class="art-spark spark-b">✦</div>
+      </div>
+    </section>
+
+    <section class="search-panel">
+      <div class="search-box"><span class="search-symbol">⌕</span><input id="searchInput" type="search" placeholder="ما الخدمة التي تبحث عنها؟ مثال: كهربائي، تنظيف..." autocomplete="off"><button id="clearSearch" class="clear-search" aria-label="مسح البحث">×</button></div>
+      <label class="filter-field"><span>المدينة</span><select id="cityFilter"><option value="الكل">كل المدن</option><option>عنابة</option><option>وهران</option><option>سطيف</option><option>الجزائر العاصمة</option></select></label>
+      <label class="filter-field"><span>نوع مقدم الخدمة</span><select id="typeFilter"><option value="الكل">الكل</option><option value="فرد">فرد</option><option value="حرفي">حرفي</option><option value="شركة">شركة</option></select></label>
+      <label class="filter-field"><span>التقييم</span><select id="ratingFilter"><option value="0">كل التقييمات</option><option value="4.5">4.5 فأكثر</option><option value="4">4 فأكثر</option><option value="3">3 فأكثر</option></select></label>
+    </section>
+
+    <div class="section-heading">
+      <div><div class="eyebrow muted">اعثر على المناسب لك</div><h2 id="sectionTitle">خدمات مختارة لك</h2><p id="sectionSubtitle">تصفح خدمات متنوعة من مقدمي خدمات مستقلين وشركات محلية.</p></div>
+      <div class="view-switch" role="group" aria-label="طريقة العرض"><button class="view-btn active" data-view="posts">▦ <span>المنشورات</span></button><button class="view-btn" data-view="map">⌖ <span>الخريطة</span></button></div>
+    </div>
+
+    <div class="content-layout">
+      <section class="listing-area">
+        <div class="results-line"><span id="resultsCount">نعرض لك خدمات تجريبية</span><button class="sort-btn" id="sortBtn">الأعلى تقييما <span>⌄</span></button></div>
+        <div id="postsView" class="posts-grid"></div>
+        <div id="emptyState" class="empty-state hidden"><div class="empty-icon">⌕</div><h3>لم نعثر على نتائج</h3><p>جرّب تغيير كلمات البحث أو الفلاتر.</p><button class="btn btn-primary" id="resetFilters">إعادة ضبط البحث</button></div>
+        <div id="mapView" class="map-view hidden"><div class="map-heading"><div><b>الخدمات على الخريطة</b><span>مواقع تجريبية حول المدن المختارة</span></div><span class="map-legend"><i></i> مقدم خدمة</span></div><div id="map"></div><div class="map-note">المواقع المعروضة افتراضية لأغراض تجربة النموذج الأولي.</div></div>
+        <div class="load-more-wrap"><button class="btn btn-outline" id="loadMoreBtn">عرض المزيد <span>↓</span></button></div>
+      </section>
+      <aside class="side-column">
+        <div class="side-card location-card"><div class="side-card-top"><span class="side-icon purple">⌖</span><span class="live-tag">تجريبي</span></div><h3>خدمات بالقرب منك</h3><p>اختر مدينتك لاكتشاف مقدمي الخدمات في محيطك.</p><div class="location-select"><span>📍</span><select id="sideCity"><option>عنابة</option><option>وهران</option><option>سطيف</option><option>الجزائر العاصمة</option></select></div><button class="btn btn-dark full-width" id="showNearbyBtn">اكتشف القريبين مني <span>←</span></button></div>
+        <div class="side-card category-card"><div class="side-title-row"><h3>تصفح الفئات</h3><span>9</span></div><div id="sideCategories" class="side-categories"></div></div>
+        <div class="side-card trust-card"><span class="trust-icon">✦</span><h3>ابحث بثقة</h3><p>اطّلع على تفاصيل الخدمة والتقييمات قبل التواصل مع مقدمها.</p><div class="trust-points"><span>✓ معلومات واضحة</span><span>✓ تقييمات من 5 نجوم</span><span>✓ تواصل مباشر</span></div></div>
+      </aside>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-main">
+        <div class="footer-about">
+          <a class="footer-brand" href="#" aria-label="KhedmaGo - الرئيسية"><img class="footer-logo" src="khedma-go-logo.png" alt="شعار KhedmaGo"><b>hedmaGo</b></a>
+          <p>منصة خدمات محلية قيد التطوير، تهدف إلى اختبار الفكرة ضمن مشروع نموذج أولي للحصول على شهادة مؤسسة ناشئة.</p>
+          <span class="footer-demo-badge"><i></i> نسخة تجريبية غير تجارية</span>
+        </div>
+        <div class="footer-links-group">
+          <h3>المنصة</h3>
+          <a href="#" id="aboutLink">عن المنصة</a>
+          <a href="#" data-footer-modal="privacy">سياسة الخصوصية</a>
+          <a href="#" data-footer-modal="terms">شروط الاستخدام</a>
+          <a href="#" data-footer-modal="service">سياسة الخدمات والإعلانات</a>
+        </div>
+        <div class="footer-links-group">
+          <h3>المساعدة والتواصل</h3>
+          <a href="#" data-footer-modal="contact">تواصل معنا</a>
+          <a href="#" data-footer-modal="safety">مسؤولية مقدمي الخدمات</a>
+          <a href="#" data-footer-modal="demo">حول النسخة التجريبية</a>
+        </div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 KhedmaGo. جميع الحقوق محفوظة.</span><span>نموذج أولي قيد التطوير.</span></div>
+    </footer>
+  </main>
+
+  <div class="drawer-scrim" id="drawerScrim"></div>
+  <aside class="side-drawer" id="sideDrawer" aria-label="القائمة الرئيسية" aria-hidden="true">
+    <div class="drawer-header"><a class="drawer-brand" href="#"><img src="khedma-go-logo.png" alt=""><span>KhedmaGo</span></a><button id="drawerClose" class="drawer-close" aria-label="إغلاق القائمة">×</button></div>
+    <div class="drawer-section drawer-profile"><button class="drawer-profile-btn" id="profileBtn"><span class="drawer-avatar">ر</span><span><b>الحساب الشخصي</b><small>حساب تجريبي</small></span><span class="drawer-profile-arrow">←</span></button></div>
+    <div class="drawer-section"><h3>التفضيلات</h3>
+      <label class="drawer-label" for="languageSelect">اللغة</label><select id="languageSelect" class="drawer-select"><option value="ar">العربية</option><option value="en">English</option></select>
+      <div class="theme-row"><div><span class="theme-icon">◐</span><div><b>المظهر</b><small>فاتح أو داكن</small></div></div><button id="themeToggle" class="theme-toggle" aria-pressed="false"><span></span><small>فاتح</small></button></div>
+      <p class="drawer-note">اختيار اللغة للعرض فقط في هذه النسخة التجريبية.</p>
+    </div>
+    <div class="drawer-section"><h3>تصفح الخدمات</h3><nav id="drawerCategories" class="drawer-categories" aria-label="فئات الخدمات"></nav></div>
+    <div class="drawer-section drawer-links"><h3>عن المنصة</h3>
+      <a href="#" id="drawerAbout">من نحن <span>←</span></a>
+      <a href="#" data-footer-modal="contact">تواصل معنا <span>←</span></a>
+      <a href="#" data-footer-modal="privacy">سياسة الخصوصية <span>←</span></a>
+      <a href="#" data-footer-modal="terms">شروط الاستخدام <span>←</span></a>
+      <a href="#" data-footer-modal="service">سياسة الخدمات والإعلانات <span>←</span></a>
+      <a href="#" data-footer-modal="safety">مسؤولية مقدمي الخدمات <span>←</span></a>
+      <a href="#" data-footer-modal="demo">حول النسخة التجريبية <span>←</span></a>
+    </div>
+    <div class="drawer-bottom"><img src="khedma-go-logo.png" alt=""><span>© 2026 KhedmaGo</span><small>نسخة تجريبية غير تجارية</small></div>
+  </aside>
+
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="إغلاق">×</button><div id="modalContent"></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
